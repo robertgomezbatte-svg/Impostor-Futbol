@@ -77,49 +77,71 @@
 
     <!-- SCREEN: ONLINE -->
     <section id="screenOnline" class="screen" aria-label="Modo online">
-      <div class="card">
-        <h1>Modo online</h1>
-        <p class="muted">Crea una sala y comparte el código. El resto se une desde su móvil.</p>
+  <div class="card">
+    <h1>Modo online</h1>
+    <p class="muted">Crea una sala, comparte el código y que empiece la caza del impostor.</p>
 
-        <div class="grid-2">
-          <label class="field">
-            <span>Tu nombre</span>
-            <input id="onlineName" type="text" placeholder="Ej: Robert" />
-            <small class="hint">Se mostrará en la sala.</small>
-          </label>
-
-          <label class="field">
-            <span>Código de sala</span>
-            <input id="onlineRoomCode" type="text" inputmode="numeric" placeholder="Ej: 123456" />
-            <small class="hint">Para unirte a una sala existente.</small>
-          </label>
-
-          <div class="field">
-            <span>Estado</span>
-            <div id="onlineStatus" class="pill">Listo.</div>
-          </div>
-
-          <div class="field">
-            <span>Sala actual</span>
-            <div class="pill code-pill">
-              <div>Código: <strong id="onlineCurrentCode">—</strong></div>
-              <button id="btnCopyCode" class="btn">Copiar</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button id="btnCreateRoom" class="btn primary">Crear partida</button>
-          <button id="btnJoinRoom" class="btn">Unirse con código</button>
-          <button id="btnBackFromOnline" class="btn danger">Volver</button>
+    <div class="online-top">
+      <div class="online-code">
+        <div class="online-code-label">Código de sala</div>
+        <div class="online-code-value" id="onlineCurrentCode">—</div>
+        <div class="online-code-actions">
+          <button id="btnCopyCode" class="btn">Copiar</button>
         </div>
       </div>
 
-      <div class="card slim">
-        <h2>Jugadores en la sala</h2>
-        <div id="onlinePlayersList" class="players-list muted">—</div>
+      <div class="online-metrics">
+        <div class="metric">
+          <div class="metric-label">Estado</div>
+          <div id="onlineStateBadge" class="state-badge state-waiting">Esperando</div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">Jugadores</div>
+          <div class="metric-value"><span id="onlinePlayersCount">0</span>/<span id="onlinePlayersMax">—</span></div>
+        </div>
       </div>
-    </section>
+    </div>
+
+    <div class="grid-2" style="margin-top:12px;">
+      <label class="field">
+        <span>Tu nombre</span>
+        <input id="onlineName" type="text" placeholder="Ej: Robert" />
+        <small class="hint">Así te verán dentro de la sala.</small>
+      </label>
+
+      <label class="field">
+        <span>Unirse con código</span>
+        <input id="onlineRoomCode" type="text" inputmode="numeric" placeholder="Ej: 123456" />
+        <small class="hint">Si alguien ya creó la sala, pon aquí el código.</small>
+      </label>
+
+      <div class="field">
+        <span>Estado</span>
+        <div id="onlineStatus" class="pill">Listo para jugar.</div>
+      </div>
+
+      <div class="field">
+        <span>Consejo rápido</span>
+        <div class="pill">Cuando estéis todos, el host empezará la partida.</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="btnCreateRoom" class="btn primary">Crear sala</button>
+      <button id="btnJoinRoom" class="btn">Unirme</button>
+      <button id="btnBackFromOnline" class="btn danger">Volver</button>
+    </div>
+  </div>
+
+  <div class="card slim">
+    <div class="online-players-header">
+      <h2 style="margin:0;">Jugadores</h2>
+      <div class="muted" id="onlinePlayersHint">Comparte el código para que se unan.</div>
+    </div>
+    <div id="onlinePlayersList" class="players-grid"></div>
+  </div>
+</section>
+
 
     <!-- SCREEN: DEAL -->
     <section id="screenDeal" class="screen" aria-label="Reparto de roles">
