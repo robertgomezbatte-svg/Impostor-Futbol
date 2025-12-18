@@ -198,7 +198,7 @@ function renderSetup() {
   ui.playersCount.value = String(state.config.nPlayers);
   ui.durationMin.value = String(Math.floor(state.config.durationSec / 60));
   ui.difficulty.value = state.config.difficulty;
-  setMiniStatus("Configura la partida");
+  setMiniStatus("Prepara el partido");
 }
 
 function applySetupInputs() {
@@ -311,7 +311,7 @@ function onNextPlayer() {
 
 function renderReady() {
   ui.readyDuration.textContent = formatTime(state.config.durationSec);
-  setMiniStatus("Listos para debatir");
+  setMiniStatus("Que empiece el debate");
 }
 
 function startTimer() {
@@ -322,7 +322,7 @@ function startTimer() {
   ui.timerDifficulty.textContent = state.config.difficulty;
   ui.timerDisplay.textContent = formatTime(state.game.timerRemaining);
 
-  setMiniStatus("Debate en curso");
+  setMiniStatus("El impostor está entre vosotros");
 
   state.game.timerInterval = setInterval(() => {
     state.game.timerRemaining -= 1;
@@ -425,7 +425,7 @@ function renderResults() {
     ui.resultsSubtitle.textContent = `El más votado fue Jugador ${top}, pero el impostor era Jugador ${realImp}.`;
   }
 
-  setMiniStatus("Partida finalizada");
+  setMiniStatus("La verdad sale a la luz");
 }
 
 function goToVoting() {
@@ -457,24 +457,107 @@ function escapeHtml(s) {
 
 // -------- ONLINE UI --------
 
+function setButtonLoading(btn, loading, loadingText, idleText) {
+  if (!btn) return;
+  if (loading) {
+    btn.disabled = true;
+    btn.dataset._idle = btn.textContent;
+    btn.textContent = loadingText;
+  } else {
+    btn.disabled = false;
+    btn.textContent = idleText || btn.dataset._idle || btn.textContent;
+  }
+}
+
+function stateLabel(state) {
+  switch (state) {
+    case "waiting": return "Esperando jugadores";
+    case "playing": return "Partida en curso";
+    case "voting": return "Votación";
+    case "finished": return "Resultado";
+    default: return "Conectado";
+  }
+}
+
+function stateClass(state) {
+  switch (state) {
+    case "waiting": return "state-waiting";
+    case "playing": return "state-playing";
+    case "voting": return "state-voting";
+    case "finished": return "state-finished";
+    default: return "state-waiting";
+  }
+}
+
+function initials(name) {
+  const n = (name || "").trim();
+  if (!n) return "??";
+  const parts = n.split(/\s+/).slice(0, 2);
+  return parts.map(p => p[0]?.toUpperCase() || "").join("") || "??";
+}
+
+function renderOnlineRoomHeader(roomData) {
+  const code = window.getCurrentRoomCode?.() || "—";
+  ui.onlineCurrentCode.textContent = code;
+
+  const maxPlayers = roomData?.config?.nPlayers ?? "—";
+  ui.onlinePlayersMax.textContent = String(maxPlayers);
+
+  const playersObj = roomData?.players || {};
+  const count = Object.keys(playersObj).length;
+  ui.onlinePlayersCount.textContent = String(count);
+
+  const st = roomData?.state || "waiting";
+  const badge = ui.onlineStateBadge;
+  if (badge) {
+    badge.classList.remove("state-waiting", "state-playing", "state-voting", "state-finished");
+    badge.classList.add(stateClass(st));
+    badge.textContent = stateLabel(st);
+  }
+
+  if (ui.onlinePlayersHint) {
+    ui.onlinePlayersHint.textContent =
+      st === "waiting"
+        ? "Comparte el código para que se unan."
+        : "Estáis dentro. Que empiece el juego.";
+  }
+}
+
 function renderOnlinePlayers(roomData) {
   const players = roomData?.players || {};
-  const list = Object.values(players).map(p => p?.name).filter(Boolean);
+  const hostId = roomData?.hostId || null;
 
-  if (!list.length) {
-    ui.onlinePlayersList.textContent = "Aún no hay jugadores en la sala.";
+  const entries = Object.entries(players)
+    .map(([id, p]) => ({ id, name: p?.name || "Jugador" }))
+    .sort((a, b) => a.name.localeCompare(b.name, "es"));
+
+  if (!entries.length) {
+    ui.onlinePlayersList.innerHTML = `<div class="muted">Aún no hay jugadores en la sala.</div>`;
     return;
   }
 
-  ui.onlinePlayersList.innerHTML = list.map(n => `<div class="player-item">• ${escapeHtml(n)}</div>`).join("");
+  ui.onlinePlayersList.innerHTML = entries.map(({ id, name }) => {
+    const isHost = hostId && id === hostId;
+    return `
+      <div class="player-card">
+        <div class="player-avatar">${escapeHtml(initials(name))}</div>
+        <div class="player-meta">
+          <div class="player-name">
+            ${escapeHtml(name)}
+            ${isHost ? `<span class="player-tag">HOST</span>` : ``}
+          </div>
+          <div class="player-sub muted">${isHost ? "Controla la sala" : "Listo para jugar"}</div>
+        </div>
+      </div>
+    `;
+  }).join("");
 }
 
 function startListeningRoom() {
   try {
     window.listenRoom((roomData) => {
-      const code = window.getCurrentRoomCode?.() || "—";
-      ui.onlineCurrentCode.textContent = code;
-      setOnlineStatus(roomData?.state ? `Estado sala: ${roomData.state}` : "Conectado.");
+      renderOnlineRoomHeader(roomData);
+      setOnlineStatus(roomData?.state ? `Estado: ${stateLabel(roomData.state)}.` : "Conectado.");
       renderOnlinePlayers(roomData);
     });
   } catch (e) {
@@ -487,7 +570,9 @@ async function createRoomFlow() {
     applySetupInputs();
     const name = (ui.onlineName.value || "").trim() || "Host";
 
-    setOnlineStatus("Creando sala…");
+    setOnlineStatus("Creando sala… preparando el terreno.");
+    setButtonLoading(ui.btnCreateRoom, true, "Creando…", "Crear sala");
+    setButtonLoading(ui.btnJoinRoom, true, "Espera…", "Unirme");
 
     const roomCode = await window.createOnlineGame({
       duration: state.config.durationSec,
@@ -496,12 +581,15 @@ async function createRoomFlow() {
     }, name);
 
     ui.onlineCurrentCode.textContent = roomCode;
-    setOnlineStatus("Sala creada. Comparte el código y espera que se unan.");
+    setOnlineStatus("Sala creada. Comparte el código y espera a los jugadores.");
     startListeningRoom();
   } catch (e) {
     console.error(e);
     alert(e?.message || String(e));
     setOnlineStatus(e?.message || String(e));
+  } finally {
+    setButtonLoading(ui.btnCreateRoom, false, "", "Crear sala");
+    setButtonLoading(ui.btnJoinRoom, false, "", "Unirme");
   }
 }
 
@@ -511,30 +599,37 @@ async function joinRoomFlow() {
     const code = (ui.onlineRoomCode.value || "").trim();
     const name = (ui.onlineName.value || "").trim() || "Jugador";
 
-    setOnlineStatus("Uniéndote a la sala…");
+    setOnlineStatus("Uniéndote… entrando al vestuario.");
+    setButtonLoading(ui.btnJoinRoom, true, "Uniendo…", "Unirme");
+    setButtonLoading(ui.btnCreateRoom, true, "Espera…", "Crear sala");
 
     await window.joinOnlineGame(code, name);
 
     ui.onlineCurrentCode.textContent = code;
-    setOnlineStatus("Unido a la sala. Espera instrucciones del host.");
+    setOnlineStatus("Dentro. Espera al host y no reveles tu pantalla.");
     startListeningRoom();
   } catch (e) {
     console.error(e);
     alert(e?.message || String(e));
     setOnlineStatus(e?.message || String(e));
+  } finally {
+    setButtonLoading(ui.btnJoinRoom, false, "", "Unirme");
+    setButtonLoading(ui.btnCreateRoom, false, "", "Crear sala");
   }
 }
 
 async function copyCode() {
   const code = ui.onlineCurrentCode.textContent || "";
   if (!code || code === "—") return;
+
   try {
     await navigator.clipboard.writeText(code);
-    setOnlineStatus("Código copiado al portapapeles.");
+    setOnlineStatus("Código copiado. Envíalo al grupo.");
   } catch (_) {
     alert("No se pudo copiar automáticamente. Copia el código manualmente: " + code);
   }
 }
+
 
 async function init() {
   loadConfigFromStorage();
