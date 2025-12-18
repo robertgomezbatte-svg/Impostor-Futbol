@@ -461,6 +461,15 @@ async function init() {
   }
 
   // Wire events
+    if (!ui.btnLocal) {
+    alert("Error: falta el botón btnLocal en index.html");
+    return;
+  }
+  if (!ui.btnOnline) {
+    alert("Error: falta el botón btnOnline en index.html");
+    return;
+  }
+
   ui.btnLocal.addEventListener("click", () => {
   applySetupInputs();
   resetGame(true);
@@ -521,20 +530,3 @@ ui.btnOnline.addEventListener("click", async () => {
 }
 
 init();
-
-document.getElementById("btnOnline").addEventListener("click", async () => {
-  const roomCode = await window.createOnlineGame({
-    duration: 600,
-    difficulty: "normal"
-  });
-
-  alert("Código de partida: " + roomCode);
-});
-if (!ui.btnLocal) {
-  alert("Error: falta el botón btnLocal en index.html");
-  return;
-}
-if (!ui.btnOnline) {
-  alert("Error: falta el botón btnOnline en index.html");
-  return;
-}
