@@ -18,7 +18,8 @@ const ui = {
   playersCount: $("playersCount"),
   durationMin: $("durationMin"),
   difficulty: $("difficulty"),
-  btnStart: $("btnStart"),
+  btnLocal: $("btnLocal"),
+btnOnline: $("btnOnline"),
 
   // Deal
   dealPlayerNum: $("dealPlayerNum"),
@@ -460,12 +461,26 @@ async function init() {
   }
 
   // Wire events
-  ui.btnStart.addEventListener("click", () => {
-    applySetupInputs();
-    resetGame(true);
-    renderDeal();
-    showScreen("deal");
+  ui.btnLocal.addEventListener("click", () => {
+  applySetupInputs();
+  resetGame(true);
+  renderDeal();
+  showScreen("deal");
+});
+
+// Botón online (de momento solo crea código)
+ui.btnOnline.addEventListener("click", async () => {
+  applySetupInputs();
+
+  const roomCode = await window.createOnlineGame({
+    duration: state.config.durationSec,
+    difficulty: state.config.difficulty,
+    nPlayers: state.config.nPlayers
   });
+
+  alert("Código de partida: " + roomCode);
+});
+
 
   ui.btnHide.addEventListener("click", onHide);
   ui.btnNextPlayer.addEventListener("click", onNextPlayer);
@@ -515,3 +530,11 @@ document.getElementById("btnOnline").addEventListener("click", async () => {
 
   alert("Código de partida: " + roomCode);
 });
+if (!ui.btnLocal) {
+  alert("Error: falta el botón btnLocal en index.html");
+  return;
+}
+if (!ui.btnOnline) {
+  alert("Error: falta el botón btnOnline en index.html");
+  return;
+}
