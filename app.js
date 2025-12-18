@@ -462,59 +462,51 @@ function escapeHtml(s) {
 }
 
 function getPlayerArtVariant(i) {
+  const uid = `p${i}`; // id único por jugador/turno
   const v = (i % 3); // 0,1,2
-  if (v === 1) return playerArtKick();
-  if (v === 2) return playerArtRun();
-  return playerArtControl();
+  if (v === 1) return playerArtKick(uid);
+  if (v === 2) return playerArtRun(uid);
+  return playerArtControl(uid);
 }
 
+
 // Ilustración SVG “dibujo” 1: chut
-function playerArtKick() {
+function playerArtKick(uid) {
   return `
   <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Jugador de fútbol chutando">
     <defs>
-      <linearGradient id="gPitch" x1="0" y1="0" x2="0" y2="1">
+      <linearGradient id="gPitch_${uid}" x1="0" y1="0" x2="0" y2="1">
         <stop offset="0" stop-color="rgba(0,212,106,0.22)"/>
         <stop offset="1" stop-color="rgba(0,0,0,0)"/>
       </linearGradient>
-      <linearGradient id="gSky" x1="0" y1="0" x2="1" y2="1">
+      <linearGradient id="gSky_${uid}" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="rgba(0,167,255,0.18)"/>
         <stop offset="1" stop-color="rgba(0,0,0,0)"/>
       </linearGradient>
-      <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <filter id="soft_${uid}" x="-20%" y="-20%" width="140%" height="140%">
         <feGaussianBlur stdDeviation="2.5"/>
       </filter>
     </defs>
 
-    <!-- sky -->
-    <rect x="0" y="0" width="960" height="260" fill="url(#gSky)"/>
-    <!-- pitch -->
-    <rect x="0" y="220" width="960" height="200" fill="url(#gPitch)"/>
+    <rect x="0" y="0" width="960" height="260" fill="url(#gSky_${uid})"/>
+    <rect x="0" y="220" width="960" height="200" fill="url(#gPitch_${uid})"/>
     <path d="M0 300H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
     <path d="M120 220V420M840 220V420" stroke="rgba(233,246,238,0.08)" stroke-width="3"/>
     <circle cx="480" cy="320" r="48" fill="none" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
 
-    <!-- shadow -->
-    <ellipse cx="480" cy="352" rx="92" ry="20" fill="rgba(0,0,0,0.35)" filter="url(#soft)"/>
+    <ellipse cx="480" cy="352" rx="92" ry="20" fill="rgba(0,0,0,0.35)" filter="url(#soft_${uid})"/>
 
-    <!-- player (hand-drawn style via strokes) -->
     <g stroke="rgba(233,246,238,0.80)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
-      <!-- head -->
       <circle cx="470" cy="120" r="34" />
-      <!-- body -->
       <path d="M470 156 C468 190, 468 210, 470 250" />
-      <!-- arms -->
       <path d="M470 190 C440 210, 420 220, 398 232" />
       <path d="M470 190 C510 205, 536 222, 560 240" />
-      <!-- left leg planted -->
       <path d="M470 250 C450 285, 440 305, 430 330" />
       <path d="M430 330 C420 350, 410 360, 392 372" />
-      <!-- right leg kicking -->
       <path d="M470 250 C510 280, 540 296, 586 300" />
       <path d="M586 300 C624 304, 650 316, 678 332" />
     </g>
 
-    <!-- shirt + shorts (filled blocks, still “illustration”) -->
     <g>
       <path d="M438 176 C456 158, 492 158, 508 176 C520 196, 518 230, 506 248 C492 270, 454 270, 440 248 C430 230, 426 196, 438 176 Z"
             fill="rgba(0,212,106,0.22)" stroke="rgba(0,212,106,0.35)" stroke-width="3"/>
@@ -522,18 +514,15 @@ function playerArtKick() {
             fill="rgba(0,167,255,0.16)" stroke="rgba(0,167,255,0.28)" stroke-width="3"/>
     </g>
 
-    <!-- ball -->
     <g transform="translate(0,0)">
       <circle cx="742" cy="346" r="22" fill="rgba(233,246,238,0.92)" />
       <path d="M730 338 L742 330 L754 338 L750 352 L734 352 Z" fill="rgba(0,0,0,0.16)"/>
       <path d="M726 346 C736 360, 750 360, 760 346" stroke="rgba(0,0,0,0.18)" stroke-width="3" fill="none"/>
     </g>
 
-    <!-- motion lines -->
     <path d="M650 330 C690 320, 712 316, 734 316" stroke="rgba(233,246,238,0.35)" stroke-width="6" stroke-linecap="round"/>
     <path d="M630 352 C676 342, 704 338, 726 338" stroke="rgba(233,246,238,0.25)" stroke-width="5" stroke-linecap="round"/>
 
-    <!-- caption -->
     <text x="30" y="48" fill="rgba(233,246,238,0.78)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="800">
       Ilustración · Jugador en acción
     </text>
@@ -542,16 +531,17 @@ function playerArtKick() {
   `;
 }
 
+
 // Ilustración 2: carrera
-function playerArtRun() {
+function playerArtRun(uid) {
   return `
   <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Jugador de fútbol corriendo">
     <defs>
-      <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <linearGradient id="g1_${uid}" x1="0" y1="0" x2="1" y2="1">
         <stop offset="0" stop-color="rgba(0,212,106,0.18)"/>
         <stop offset="1" stop-color="rgba(0,167,255,0.14)"/>
       </linearGradient>
-      <filter id="soft2" x="-20%" y="-20%" width="140%" height="140%">
+      <filter id="soft2_${uid}" x="-20%" y="-20%" width="140%" height="140%">
         <feGaussianBlur stdDeviation="2.5"/>
       </filter>
     </defs>
@@ -559,7 +549,7 @@ function playerArtRun() {
     <rect x="0" y="0" width="960" height="420" fill="rgba(0,0,0,0)"/>
     <path d="M0 260H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
     <path d="M0 330H960" stroke="rgba(233,246,238,0.06)" stroke-width="3"/>
-    <ellipse cx="480" cy="350" rx="110" ry="22" fill="rgba(0,0,0,0.35)" filter="url(#soft2)"/>
+    <ellipse cx="480" cy="350" rx="110" ry="22" fill="rgba(0,0,0,0.35)" filter="url(#soft2_${uid})"/>
 
     <g stroke="rgba(233,246,238,0.80)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
       <circle cx="470" cy="122" r="34"/>
@@ -580,6 +570,7 @@ function playerArtRun() {
     <circle cx="728" cy="338" r="22" fill="rgba(233,246,238,0.92)"/>
     <path d="M716 330 L728 322 L740 330 L736 344 L720 344 Z" fill="rgba(0,0,0,0.16)"/>
     <path d="M700 324 C720 304, 744 298, 770 300" stroke="rgba(233,246,238,0.22)" stroke-width="5" stroke-linecap="round"/>
+
     <text x="30" y="48" fill="rgba(233,246,238,0.78)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="800">
       Ilustración · Carrera hacia el balón
     </text>
@@ -588,12 +579,13 @@ function playerArtRun() {
   `;
 }
 
+
 // Ilustración 3: control del balón
-function playerArtControl() {
+function playerArtControl(uid) {
   return `
   <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Jugador de fútbol controlando el balón">
     <defs>
-      <filter id="soft3" x="-20%" y="-20%" width="140%" height="140%">
+      <filter id="soft3_${uid}" x="-20%" y="-20%" width="140%" height="140%">
         <feGaussianBlur stdDeviation="2.5"/>
       </filter>
     </defs>
@@ -602,7 +594,7 @@ function playerArtControl() {
     <path d="M0 260H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
     <path d="M120 260 C220 220, 340 220, 480 260 C620 300, 740 300, 840 260" stroke="rgba(233,246,238,0.06)" stroke-width="3" fill="none"/>
 
-    <ellipse cx="480" cy="352" rx="95" ry="20" fill="rgba(0,0,0,0.35)" filter="url(#soft3)"/>
+    <ellipse cx="480" cy="352" rx="95" ry="20" fill="rgba(0,0,0,0.35)" filter="url(#soft3_${uid})"/>
 
     <g stroke="rgba(233,246,238,0.80)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
       <circle cx="480" cy="120" r="34"/>
@@ -630,6 +622,7 @@ function playerArtControl() {
   <div class="cap">No mires pantallas ajenas. Cada pista cuenta.</div>
   `;
 }
+
 
 // -------- ONLINE UI --------
 
@@ -846,7 +839,7 @@ async function init() {
     setMiniStatus("Modo online");
     setOnlineStatus("Listo.");
     ui.onlineCurrentCode.textContent = "—";
-    ui.onlinePlayersList.textContent = "—";
+    ui.onlinePlayersList.innerHTML = `<div class="muted">Aún no hay jugadores en la sala.</div>`;
     showScreen("online");
   });
 
@@ -854,9 +847,10 @@ async function init() {
   ui.btnCreateRoom.addEventListener("click", createRoomFlow);
   ui.btnJoinRoom.addEventListener("click", joinRoomFlow);
   ui.btnBackFromOnline.addEventListener("click", () => {
-    setMiniStatus("Configura la partida");
-    showScreen("setup");
-  });
+  setMiniStatus("Prepara el partido");
+  showScreen("setup");
+});
+
   ui.btnCopyCode.addEventListener("click", copyCode);
 
   // Local rest (igual que tenías)
