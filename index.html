@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Impostor de Futbolistas</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="stadium-bg"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="badge">⚽</div>
+      <div>
+        <div class="brand-title">Impostor de Futbolistas</div>
+        <div class="brand-sub">Modo grupo · pasar el móvil</div>
+      </div>
+    </div>
+    <div id="miniStatus" class="mini-status" aria-live="polite"></div>
+  </header>
+
+  <main class="container">
+
+    <!-- SCREEN: SETUP -->
+    <section id="screenSetup" class="screen active" aria-label="Configuración">
+      <div class="card">
+        <h1>Configurar partida</h1>
+        <p class="muted">Un jugador será el impostor y verá una pista. Los demás verán el futbolista.</p>
+
+        <div class="grid-2">
+          <label class="field">
+            <span>Número de jugadores</span>
+            <input id="playersCount" type="number" min="3" max="12" value="4" />
+            <small class="hint">Entre 3 y 12.</small>
+          </label>
+
+          <label class="field">
+            <span>Duración del debate (minutos)</span>
+            <input id="durationMin" type="number" min="5" max="15" value="10" />
+            <small class="hint">Entre 5 y 15.</small>
+          </label>
+
+          <label class="field">
+            <span>Dificultad</span>
+            <select id="difficulty">
+              <option value="easy">Fácil</option>
+              <option value="normal" selected>Normal</option>
+              <option value="hard">Difícil</option>
+            </select>
+            <small class="hint">Por defecto: normal.</small>
+          </label>
+
+          <div class="field">
+            <span>Consejo</span>
+            <div class="pill">
+              Reparte roles sin que nadie mire la pantalla del otro.
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnStart" class="btn primary">Iniciar partida</button>
+        </div>
+      </div>
+
+      <div class="card slim">
+        <h2>Cómo se juega (resumen)</h2>
+        <ol class="list">
+          <li>Repartes roles pasando el móvil.</li>
+          <li>Habláis 10 minutos.</li>
+          <li>Votáis por turnos en este mismo móvil.</li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- SCREEN: DEAL -->
+    <section id="screenDeal" class="screen" aria-label="Reparto de roles">
+      <div class="card">
+        <h1>Reparto de roles</h1>
+        <p class="muted">Pásale el móvil a cada jugador. Nadie debe ver roles anteriores.</p>
+
+        <div class="scoreline">
+          <div class="chip">Jugador <strong id="dealPlayerNum">1</strong></div>
+          <div class="chip">Progreso: <strong id="dealProgress">1/4</strong></div>
+        </div>
+
+        <div id="revealBox" class="reveal">
+          <div class="reveal-top">
+            <div class="reveal-title">Jugador <span id="revealPlayerNum">1</span></div>
+            <div id="roleTag" class="tag">Listo</div>
+          </div>
+
+          <div id="revealContent" class="reveal-content">
+            <div class="locker">
+              <div class="locker-icon">🔒</div>
+              <div class="locker-text">Pulsa para ver tu rol</div>
+              <button id="btnReveal" class="btn primary">Ver mi rol</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnHide" class="btn" disabled>Ocultar</button>
+          <button id="btnNextPlayer" class="btn primary" disabled>Siguiente jugador</button>
+        </div>
+      </div>
+
+      <div class="card slim">
+        <h2>Norma</h2>
+        <p class="muted">Cuando termines de ver tu rol, pulsa <strong>Ocultar</strong> antes de pasar el móvil.</p>
+      </div>
+    </section>
+
+    <!-- SCREEN: READY -->
+    <section id="screenReady" class="screen" aria-label="Listos">
+      <div class="card">
+        <h1>Todos listos</h1>
+        <p class="muted">Ahora empieza el debate. Cuando termine el tiempo, pasaréis a votación.</p>
+
+        <div class="big-center">
+          <div class="pitch-icon">🏟️</div>
+          <div class="big-text">Duración: <strong id="readyDuration">10:00</strong></div>
+        </div>
+
+        <div class="actions">
+          <button id="btnBeginTimer" class="btn primary">Empezar cronómetro</button>
+          <button id="btnRestartFromReady" class="btn danger">Reiniciar partida</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN: TIMER -->
+    <section id="screenTimer" class="screen" aria-label="Cronómetro">
+      <div class="card">
+        <h1>Debate</h1>
+        <p class="muted">Habláis entre vosotros. El impostor intenta adivinar el futbolista sin delatarse.</p>
+
+        <div class="timer-wrap">
+          <div id="timerDisplay" class="timer">10:00</div>
+          <div class="timer-sub">
+            <span class="chip">Impostor: 1</span>
+            <span class="chip">Jugadores: <span id="timerPlayers">4</span></span>
+            <span class="chip">Dificultad: <span id="timerDifficulty">normal</span></span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnEndEarly" class="btn">Ir a votación</button>
+          <button id="btnRestartFromTimer" class="btn danger">Reiniciar partida</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN: VOTE -->
+    <section id="screenVote" class="screen" aria-label="Votación">
+      <div class="card">
+        <h1>Votación por turnos</h1>
+        <p class="muted">Pasa el móvil. Cada jugador vota una vez.</p>
+
+        <div class="scoreline">
+          <div class="chip">Turno: Jugador <strong id="voteTurn">1</strong></div>
+          <div class="chip">Progreso: <strong id="voteProgress">1/4</strong></div>
+        </div>
+
+        <div class="grid-2">
+          <label class="field">
+            <span>Elijo como impostor a…</span>
+            <select id="voteSelect"></select>
+            <small class="hint">Puedes permitir auto-voto (MVP).</small>
+          </label>
+
+          <div class="field">
+            <span>Confirmación</span>
+            <div id="voteConfirmBox" class="pill">
+              Selecciona un jugador y confirma.
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnConfirmVote" class="btn primary">Confirmar voto</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREEN: RESULTS -->
+    <section id="screenResults" class="screen" aria-label="Resultados">
+      <div class="card">
+        <h1>Resultados</h1>
+
+        <div class="results-hero">
+          <div class="results-badge" id="resultsBadge">🏆</div>
+          <div class="results-text">
+            <div class="results-title" id="resultsTitle">Fin de la partida</div>
+            <div class="muted" id="resultsSubtitle">Recuento de votos y solución.</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="panel">
+            <h3>Solución</h3>
+            <div class="kv">
+              <div class="k">Impostor real</div>
+              <div class="v" id="realImpostor">Jugador ?</div>
+            </div>
+            <div class="kv">
+              <div class="k">Futbolista</div>
+              <div class="v" id="realPlayerName">—</div>
+            </div>
+            <div class="kv">
+              <div class="k">Pista usada</div>
+              <div class="v" id="realClue">—</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <h3>Votos</h3>
+            <div id="votesList" class="votes"></div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnPlayAgain" class="btn primary">Nueva partida</button>
+          <button id="btnPlaySame" class="btn">Jugar con misma configuración</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span class="muted">Hecho para jugar en grupo. Sin login. Datos en local.</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

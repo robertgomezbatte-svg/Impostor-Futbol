@@ -1,0 +1,110 @@
+[
+  {
+    "id": 1,
+    "name": "Pedri",
+    "pistas": {
+      "easy": ["Juega en el FC Barcelona", "Es español", "Centrocampista"],
+      "normal": ["Juega en LaLiga", "Perfil creativo en el medio", "Destaca por su visión de juego"],
+      "hard": ["Centrocampista técnico", "Alta participación con balón", "Inteligencia táctica"]
+    }
+  },
+  {
+    "id": 2,
+    "name": "Jude Bellingham",
+    "pistas": {
+      "easy": ["Es inglés", "Ha jugado en Alemania", "Centrocampista"],
+      "normal": ["Muy físico y llegador", "Destaca en un club grande", "Tiene gol desde segunda línea"],
+      "hard": ["Box-to-box moderno", "Gran impacto mediático", "Influye en ambas áreas"]
+    }
+  },
+  {
+    "id": 3,
+    "name": "Kylian Mbappé",
+    "pistas": {
+      "easy": ["Es francés", "Muy rápido", "Atacante"],
+      "normal": ["Extremo/Delantero muy veloz", "Suele decidir partidos", "Es de los más mediáticos del mundo"],
+      "hard": ["Amenaza constante al espacio", "Mucho desequilibrio", "Finalizador de élite"]
+    }
+  },
+  {
+    "id": 4,
+    "name": "Erling Haaland",
+    "pistas": {
+      "easy": ["Es noruego", "Delantero centro", "Muy alto"],
+      "normal": ["Gran remate en el área", "Potencia física", "Muchos goles por temporada"],
+      "hard": ["Depredador del área", "Amenaza en centros", "Eficacia altísima"]
+    }
+  },
+  {
+    "id": 5,
+    "name": "Vinícius Júnior",
+    "pistas": {
+      "easy": ["Es brasileño", "Juega por banda", "Muy rápido"],
+      "normal": ["Gran regate en el 1 vs 1", "Suele jugar en un equipo top", "Genera muchas ocasiones"],
+      "hard": ["Extremo muy vertical", "Provoca faltas", "Acelera el juego"]
+    }
+  },
+  {
+    "id": 6,
+    "name": "Robert Lewandowski",
+    "pistas": {
+      "easy": ["Es polaco", "Delantero centro", "Muy goleador"],
+      "normal": ["Gran definición", "Buen juego de espaldas", "Veterano con experiencia top"],
+      "hard": ["Finalizador clínico", "Movimiento en el área", "Lectura de desmarques"]
+    }
+  },
+  {
+    "id": 7,
+    "name": "Rodri",
+    "pistas": {
+      "easy": ["Es español", "Mediocentro", "Fuerte defensivamente"],
+      "normal": ["Organiza el juego desde el medio", "Muy fiable tácticamente", "Importante en un equipo dominante"],
+      "hard": ["Pivote posicional", "Control de ritmo", "Cubre mucho espacio"]
+    }
+  },
+  {
+    "id": 8,
+    "name": "Mohamed Salah",
+    "pistas": {
+      "easy": ["Es egipcio", "Atacante", "Muy rápido"],
+      "normal": ["Suele jugar partiendo desde la derecha", "Gran gol y asistencias", "Figura en una liga muy competitiva"],
+      "hard": ["Amenaza constante al segundo palo", "Mucho volumen ofensivo", "Finalizador desde banda"]
+    }
+  },
+  {
+    "id": 9,
+    "name": "Kevin De Bruyne",
+    "pistas": {
+      "easy": ["Es belga", "Centrocampista", "Pasa muy bien"],
+      "normal": ["Asistencias de alto nivel", "Gran golpeo exterior", "Creador de juego"],
+      "hard": ["Último pase élite", "Visión y precisión", "Ritmo alto en transición"]
+    }
+  },
+  {
+    "id": 10,
+    "name": "Lionel Messi",
+    "pistas": {
+      "easy": ["Es argentino", "Muy famoso", "Atacante"],
+      "normal": ["Gran regate y visión", "Histórico con muchos títulos", "Ha marcado una época"],
+      "hard": ["Talento diferencial", "Creatividad y finalización", "Influencia total en el juego"]
+    }
+  },
+  {
+    "id": 11,
+    "name": "Cristiano Ronaldo",
+    "pistas": {
+      "easy": ["Es portugués", "Muy famoso", "Ha marcado muchos goles"],
+      "normal": ["Gran remate", "Mentalidad competitiva", "Ha jugado en varios grandes"],
+      "hard": ["Amenaza aérea", "Finalizador total", "Presencia en el área"]
+    }
+  },
+  {
+    "id": 12,
+    "name": "Luka Modrić",
+    "pistas": {
+      "easy": ["Es croata", "Centrocampista", "Muy técnico"],
+      "normal": ["Control del ritmo", "Pases entre líneas", "Veterano de élite"],
+      "hard": ["Interior creativo", "Salida de balón", "Lectura del juego"]
+    }
+  }
+]
