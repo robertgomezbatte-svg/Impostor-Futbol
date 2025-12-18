@@ -8,7 +8,6 @@ import {
 
 let currentRoom = null;
 let playerId = null;
-let unsubscribe = null; // simple control (no hay off() fácil con este import; lo manejamos con guardas)
 
 function makePlayerId() {
   return "player_" + Math.random().toString(36).slice(2, 10);
@@ -33,16 +32,24 @@ window.createOnlineGame = async function (config, name) {
   const roomCode = Math.floor(100000 + Math.random() * 900000).toString();
   const roomRef = ref(db, "rooms/" + roomCode);
 
-  // Creamos sala
+  // Host: generamos el id primero para guardarlo como hostId
+  const hostId = makePlayerId();
+  playerId = hostId;
+  currentRoom = roomCode;
+
   await set(roomRef, {
     config,
     state: "waiting",
     createdAt: Date.now(),
-    players: {}
+    hostId,
+    players: {
+      [hostId]: {
+        name: safeName(name || "Host"),
+        joinedAt: Date.now(),
+        vote: null
+      }
+    }
   });
-
-  // El host se une automáticamente
-  await window.joinOnlineGame(roomCode, name || "Host");
 
   return roomCode;
 };
@@ -56,28 +63,22 @@ window.joinOnlineGame = async function (roomCode, name) {
   }
 
   playerId = makePlayerId();
-  const playerRef = ref(db, `rooms/${code}/players/${playerId}`);
+  currentRoom = code;
 
+  const playerRef = ref(db, `rooms/${code}/players/${playerId}`);
   await set(playerRef, {
     name: safeName(name),
     joinedAt: Date.now(),
     vote: null
   });
-
-  currentRoom = code;
 };
 
 window.listenRoom = function (callback) {
   ensureFirebaseReady();
+  if (!currentRoom) throw new Error("No hay sala activa.");
 
-  if (!currentRoom) throw new Error("No hay sala activa (currentRoom es null).");
-
-  // Guardas para no duplicar renders
   const roomRef = ref(db, "rooms/" + currentRoom);
-
-  onValue(roomRef, (snapshot) => {
-    callback(snapshot.val());
-  });
+  onValue(roomRef, (snapshot) => callback(snapshot.val()));
 };
 
 window.getCurrentRoomCode = function () {
