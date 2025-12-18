@@ -338,3 +338,22 @@ input:focus, select:focus{
   border-top: 1px solid var(--line);
   background: rgba(3, 10, 6, 0.40);
 }
+.code-pill{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:space-between;
+}
+
+.players-list{
+  padding: 8px 2px;
+}
+
+.player-item{
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(233,246,238,0.10);
+}
+.player-item:last-child{
+  border-bottom: none;
+}
+
