@@ -3,14 +3,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 // 🔴 AQUÍ PEGARÁS TU CONFIG DE FIREBASE (luego te digo dónde sacarla)
-export const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://TU_PROJECT_ID-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_PROJECT_ID.appspot.com",
-  messagingSenderId: "TU_SENDER_ID",
-  appId: "TU_APP_ID"
+const firebaseConfig = {
+  apiKey: "AIzaSyDld_UHHytc0huKUD9bxHUnDACKFqlQMJo",
+  authDomain: "impostor-futbolistas-6eb94.firebaseapp.com",
+  projectId: "impostor-futbolistas-6eb94",
+  storageBucket: "impostor-futbolistas-6eb94.firebasestorage.app",
+  messagingSenderId: "536914780412",
+  appId: "1:536914780412:web:0cacf60a16559b5c90f779",
+  measurementId: "G-H3Q85PLHE7"
 };
 
 export const app = initializeApp(firebaseConfig);
