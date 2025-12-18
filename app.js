@@ -223,7 +223,7 @@ function renderDeal() {
   ui.revealPlayerNum.textContent = String(i);
   ui.dealProgress.textContent = `${i}/${n}`;
   if (ui.dealArt) {
-  ui.dealArt.innerHTML = getPlayerArtVariant(state.game.dealIndex);
+  ui.dealArt.innerHTML = renderDealArtNeutral(`p${state.game.dealIndex}`);
 }
 
 
@@ -250,10 +250,21 @@ function renderDeal() {
 function onReveal() {
   const i = state.game.dealIndex;
   const impostor = (i === state.game.impostorIndex);
+// Actualiza ilustración según rol y futbolista
+if (ui.dealArt) {
+  const uid = `p${i}`;
+  ui.dealArt.innerHTML = impostor
+    ? renderImpostorArt(uid)
+    : renderFootballerArtByName(state.game.target?.name || "", uid);
+}
 
   if (impostor) {
     ui.roleTag.textContent = "IMPOSTOR";
     ui.roleTag.classList.add("impostor");
+    if (ui.dealArt) {
+  ui.dealArt.innerHTML = renderDealArtNeutral(`p${state.game.dealIndex}`);
+}
+
     ui.revealContent.innerHTML = `
       <div class="rolebox">
         <div class="role-main">
@@ -459,6 +470,249 @@ function escapeHtml(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+function normName(s) {
+  return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+function renderDealArtNeutral(uid) {
+  // Antes de revelar: un “momento estadio” neutro
+  return `
+    <div class="deal-art-wrap">
+      ${svgNeutralStadium(uid)}
+      <div class="cap">Pulsa “Ver mi rol”. No dejes que nadie mire tu pantalla.</div>
+    </div>
+  `;
+}
+
+function renderImpostorArt(uid) {
+  return `
+    <div class="deal-art-wrap">
+      ${svgImpostorSilhouette(uid)}
+      <div class="cap">Eres el impostor. Disimula… y adivina el futbolista.</div>
+    </div>
+  `;
+}
+
+function renderFootballerArtByName(playerName, uid) {
+  const n = normName(playerName);
+
+  // Ajusta aquí los “match” si tu JSON usa otra forma
+  if (n.includes("messi")) return wrapArt(svgMessiLike(uid), `Hoy toca magia. No digas el nombre.`);
+  if (n.includes("cristiano") || n.includes("ronaldo")) return wrapArt(svgCristianoLike(uid), `Potencia y nervios de acero. Juega fino.`);
+  if (n.includes("neymar")) return wrapArt(svgNeymarLike(uid), `Regate y creatividad. Habla sin delatarte.`);
+  if (n.includes("mbappe") || n.includes("mbappé")) return wrapArt(svgMbappeLike(uid), `Velocidad total. Describe sin decir quién es.`);
+  if (n.includes("haaland")) return wrapArt(svgHaalandLike(uid), `Fuerza y gol. Mantén la calma.`);
+
+  // Fallback si el futbolista no está entre los 5
+  return wrapArt(svgGenericPlayer(uid), `Habla con naturalidad. No digas el nombre.`);
+}
+
+function wrapArt(svg, caption) {
+  return `
+    <div class="deal-art-wrap">
+      ${svg}
+      <div class="cap">${escapeHtml(caption)}</div>
+    </div>
+  `;
+}
+
+/* =========================
+   SVGs (estilo dibujo)
+   ========================= */
+
+function svgNeutralStadium(uid) {
+  return `
+  <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Estadio">
+    <defs>
+      <linearGradient id="sky_${uid}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="rgba(0,167,255,0.18)"/>
+        <stop offset="1" stop-color="rgba(0,0,0,0)"/>
+      </linearGradient>
+      <linearGradient id="pitch_${uid}" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="rgba(0,212,106,0.22)"/>
+        <stop offset="1" stop-color="rgba(0,0,0,0)"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="960" height="250" fill="url(#sky_${uid})"/>
+    <rect x="0" y="220" width="960" height="200" fill="url(#pitch_${uid})"/>
+    <path d="M0 300H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
+    <circle cx="480" cy="320" r="56" fill="none" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
+    <path d="M120 220V420M840 220V420" stroke="rgba(233,246,238,0.08)" stroke-width="3"/>
+    <text x="30" y="52" fill="rgba(233,246,238,0.78)"
+      font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial"
+      font-size="16" font-weight="900">Momento de revelar</text>
+  </svg>`;
+}
+
+function svgImpostorSilhouette(uid) {
+  return `
+  <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Silueta con interrogante">
+    <defs>
+      <filter id="soft_${uid}" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="2.5"/>
+      </filter>
+      <linearGradient id="bg_${uid}" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="rgba(255,59,77,0.18)"/>
+        <stop offset="1" stop-color="rgba(0,0,0,0)"/>
+      </linearGradient>
+    </defs>
+    <rect x="0" y="0" width="960" height="420" fill="url(#bg_${uid})"/>
+    <ellipse cx="480" cy="352" rx="120" ry="22" fill="rgba(0,0,0,0.35)" filter="url(#soft_${uid})"/>
+    <g fill="rgba(233,246,238,0.14)" stroke="rgba(233,246,238,0.22)" stroke-width="3">
+      <circle cx="480" cy="130" r="46"/>
+      <path d="M380 330 C392 255, 420 220, 480 220 C540 220, 568 255, 580 330 Z"/>
+    </g>
+    <text x="480" y="225" text-anchor="middle"
+      fill="rgba(233,246,238,0.88)"
+      font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial"
+      font-size="120" font-weight="1000">?</text>
+    <text x="30" y="52" fill="rgba(233,246,238,0.78)"
+      font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial"
+      font-size="16" font-weight="900">IMPOSTOR</text>
+  </svg>`;
+}
+
+function svgGenericPlayer(uid) {
+  return `
+  <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Jugador genérico">
+    <defs>
+      <filter id="softg_${uid}" x="-20%" y="-20%" width="140%" height="140%">
+        <feGaussianBlur stdDeviation="2.5"/>
+      </filter>
+    </defs>
+    <path d="M0 260H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
+    <ellipse cx="480" cy="352" rx="110" ry="22" fill="rgba(0,0,0,0.35)" filter="url(#softg_${uid})"/>
+    <g stroke="rgba(233,246,238,0.80)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <circle cx="480" cy="120" r="34"/>
+      <path d="M480 156 C480 198, 480 220, 480 252"/>
+      <path d="M480 196 C444 214, 420 232, 396 256"/>
+      <path d="M480 196 C520 212, 548 236, 572 262"/>
+      <path d="M480 252 C450 286, 430 312, 410 334"/>
+      <path d="M480 252 C510 280, 536 304, 562 322"/>
+    </g>
+    <circle cx="650" cy="350" r="22" fill="rgba(233,246,238,0.92)"/>
+    <text x="30" y="52" fill="rgba(233,246,238,0.78)"
+      font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial"
+      font-size="16" font-weight="900">Jugador</text>
+  </svg>`;
+}
+
+/* Los 5 “dibujos” (estilo reconocible, no fotorrealista) */
+
+function svgMessiLike(uid) {
+  return `
+  <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración estilo Messi">
+    <defs><filter id="s_${uid}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.3"/></filter></defs>
+    <path d="M0 260H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
+    <ellipse cx="480" cy="352" rx="110" ry="22" fill="rgba(0,0,0,0.35)" filter="url(#s_${uid})"/>
+    <g stroke="rgba(233,246,238,0.80)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <circle cx="470" cy="118" r="34"/>
+      <!-- “barba” ligera -->
+      <path d="M446 124 C456 148, 486 148, 494 124" stroke="rgba(233,246,238,0.55)" />
+      <path d="M470 152 C468 196, 468 220, 468 252"/>
+      <path d="M468 196 C432 210, 410 226, 386 248"/>
+      <path d="M468 196 C508 210, 540 232, 566 262"/>
+      <path d="M468 252 C440 282, 420 310, 402 334"/>
+      <path d="M468 252 C502 282, 530 304, 560 320"/>
+    </g>
+    <path d="M436 176 C456 158, 492 158, 510 176 C522 198, 520 236, 504 252 C490 268, 456 268, 442 252 C426 236, 424 198, 436 176 Z"
+      fill="rgba(0,167,255,0.16)" stroke="rgba(0,167,255,0.28)" stroke-width="3"/>
+    <circle cx="640" cy="350" r="22" fill="rgba(233,246,238,0.92)"/>
+    <text x="30" y="52" fill="rgba(233,246,238,0.78)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="900">Futbolista</text>
+  </svg>`;
+}
+
+function svgCristianoLike(uid) {
+  return `
+  <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración estilo Cristiano">
+    <defs><filter id="s_${uid}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.3"/></filter></defs>
+    <path d="M0 260H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
+    <ellipse cx="480" cy="352" rx="120" ry="22" fill="rgba(0,0,0,0.35)" filter="url(#s_${uid})"/>
+    <g stroke="rgba(233,246,238,0.80)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <circle cx="480" cy="118" r="34"/>
+      <!-- “peinado” pico -->
+      <path d="M460 90 C476 72, 504 80, 512 98" stroke="rgba(233,246,238,0.55)"/>
+      <path d="M480 152 C480 196, 480 218, 480 252"/>
+      <path d="M480 192 C520 200, 552 218, 586 244"/>
+      <path d="M480 192 C446 214, 420 232, 392 258"/>
+      <path d="M480 252 C446 286, 424 312, 404 334"/>
+      <path d="M480 252 C520 284, 550 304, 586 314"/>
+    </g>
+    <path d="M444 176 C462 156, 498 156, 518 176 C534 204, 528 244, 508 258 C490 272, 460 270, 446 248 C434 226, 430 198, 444 176 Z"
+      fill="rgba(0,212,106,0.18)" stroke="rgba(0,212,106,0.30)" stroke-width="3"/>
+    <circle cx="660" cy="350" r="22" fill="rgba(233,246,238,0.92)"/>
+    <text x="30" y="52" fill="rgba(233,246,238,0.78)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="900">Futbolista</text>
+  </svg>`;
+}
+
+function svgNeymarLike(uid) {
+  return `
+  <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración estilo Neymar">
+    <defs><filter id="s_${uid}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.3"/></filter></defs>
+    <path d="M0 260H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
+    <ellipse cx="480" cy="352" rx="110" ry="22" fill="rgba(0,0,0,0.35)" filter="url(#s_${uid})"/>
+    <g stroke="rgba(233,246,238,0.80)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <circle cx="472" cy="118" r="34"/>
+      <!-- “fade” lateral -->
+      <path d="M445 120 C452 140, 458 146, 468 150" stroke="rgba(233,246,238,0.55)"/>
+      <path d="M472 152 C470 196, 470 220, 470 252"/>
+      <path d="M470 196 C438 210, 410 232, 390 258"/>
+      <path d="M470 196 C510 212, 540 238, 572 270"/>
+      <path d="M470 252 C438 280, 416 306, 396 334"/>
+      <path d="M470 252 C506 282, 534 304, 562 320"/>
+    </g>
+    <path d="M438 176 C456 156, 492 156, 512 176 C526 202, 520 242, 500 256 C482 268, 456 266, 442 246 C430 226, 426 198, 438 176 Z"
+      fill="rgba(0,167,255,0.14)" stroke="rgba(0,167,255,0.26)" stroke-width="3"/>
+    <circle cx="640" cy="350" r="22" fill="rgba(233,246,238,0.92)"/>
+    <text x="30" y="52" fill="rgba(233,246,238,0.78)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="900">Futbolista</text>
+  </svg>`;
+}
+
+function svgMbappeLike(uid) {
+  return `
+  <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración estilo Mbappé">
+    <defs><filter id="s_${uid}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.3"/></filter></defs>
+    <path d="M0 260H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
+    <ellipse cx="480" cy="352" rx="110" ry="22" fill="rgba(0,0,0,0.35)" filter="url(#s_${uid})"/>
+    <g stroke="rgba(233,246,238,0.80)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <circle cx="480" cy="118" r="34"/>
+      <!-- cabeza rapada -->
+      <path d="M452 104 C470 92, 490 92, 508 104" stroke="rgba(233,246,238,0.55)"/>
+      <path d="M480 152 C480 196, 480 220, 480 252"/>
+      <path d="M480 196 C446 214, 420 236, 396 262"/>
+      <path d="M480 196 C520 212, 548 236, 576 268"/>
+      <path d="M480 252 C450 284, 428 310, 408 334"/>
+      <path d="M480 252 C516 280, 542 302, 570 320"/>
+    </g>
+    <path d="M446 176 C466 156, 498 156, 518 176 C532 200, 528 238, 508 254 C490 270, 460 268, 446 248 C434 226, 432 200, 446 176 Z"
+      fill="rgba(0,212,106,0.16)" stroke="rgba(0,212,106,0.28)" stroke-width="3"/>
+    <circle cx="650" cy="350" r="22" fill="rgba(233,246,238,0.92)"/>
+    <text x="30" y="52" fill="rgba(233,246,238,0.78)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="900">Futbolista</text>
+  </svg>`;
+}
+
+function svgHaalandLike(uid) {
+  return `
+  <svg viewBox="0 0 960 420" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Ilustración estilo Haaland">
+    <defs><filter id="s_${uid}" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2.3"/></filter></defs>
+    <path d="M0 260H960" stroke="rgba(233,246,238,0.10)" stroke-width="3"/>
+    <ellipse cx="480" cy="352" rx="130" ry="22" fill="rgba(0,0,0,0.35)" filter="url(#s_${uid})"/>
+    <g stroke="rgba(233,246,238,0.80)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" fill="none">
+      <circle cx="480" cy="118" r="34"/>
+      <!-- pelo hacia atrás -->
+      <path d="M452 96 C476 82, 510 90, 520 112" stroke="rgba(233,246,238,0.55)"/>
+      <path d="M480 152 C480 196, 480 220, 480 252"/>
+      <path d="M480 196 C442 214, 414 238, 388 268"/>
+      <path d="M480 196 C524 210, 560 238, 594 270"/>
+      <path d="M480 252 C444 286, 420 312, 396 334"/>
+      <path d="M480 252 C524 282, 556 304, 594 316"/>
+    </g>
+    <path d="M438 176 C458 154, 502 154, 522 176 C540 206, 534 246, 510 260 C488 274, 454 272, 438 246 C426 226, 424 200, 438 176 Z"
+      fill="rgba(0,167,255,0.14)" stroke="rgba(0,167,255,0.26)" stroke-width="3"/>
+    <circle cx="670" cy="350" r="22" fill="rgba(233,246,238,0.92)"/>
+    <text x="30" y="52" fill="rgba(233,246,238,0.78)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="16" font-weight="900">Futbolista</text>
+  </svg>`;
 }
 
 function getPlayerArtVariant(i) {
