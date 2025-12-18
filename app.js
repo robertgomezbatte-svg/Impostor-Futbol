@@ -22,16 +22,21 @@ const ui = {
   btnLocal: $("btnLocal"),
   btnOnline: $("btnOnline"),
 
-  // Online
-  onlineName: $("onlineName"),
-  onlineRoomCode: $("onlineRoomCode"),
-  onlineStatus: $("onlineStatus"),
-  onlineCurrentCode: $("onlineCurrentCode"),
-  onlinePlayersList: $("onlinePlayersList"),
-  btnCreateRoom: $("btnCreateRoom"),
-  btnJoinRoom: $("btnJoinRoom"),
-  btnBackFromOnline: $("btnBackFromOnline"),
-  btnCopyCode: $("btnCopyCode"),
+// Online
+onlineName: $("onlineName"),
+onlineRoomCode: $("onlineRoomCode"),
+onlineStatus: $("onlineStatus"),
+onlineCurrentCode: $("onlineCurrentCode"),
+onlinePlayersList: $("onlinePlayersList"),
+btnCreateRoom: $("btnCreateRoom"),
+btnJoinRoom: $("btnJoinRoom"),
+btnBackFromOnline: $("btnBackFromOnline"),
+btnCopyCode: $("btnCopyCode"),
+onlineStateBadge: $("onlineStateBadge"),
+onlinePlayersCount: $("onlinePlayersCount"),
+onlinePlayersMax: $("onlinePlayersMax"),
+onlinePlayersHint: $("onlinePlayersHint"),
+
 
   // Deal
   dealPlayerNum: $("dealPlayerNum"),
