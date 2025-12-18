@@ -5,7 +5,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyDld_UHHytc0huKUD9bxHUnDACKFqlQMJo",
   authDomain: "impostor-futbolistas-6eb94.firebaseapp.com",
 
-  databaseURL: "https://console.firebase.google.com/u/0/project/impostor-futbolistas-6eb94/database/impostor-futbolistas-6eb94-default-rtdb/data/~2F?hl=es-419",
+  databaseURL: "https://impostor-futbolistas-6eb94-default-rtdb.europe-west1.firebasedatabase.app/",
 
   projectId: "impostor-futbolistas-6eb94",
   storageBucket: "impostor-futbolistas-6eb94.firebasestorage.app",
