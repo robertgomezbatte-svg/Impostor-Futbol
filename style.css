@@ -523,4 +523,25 @@ input:focus, select:focus{
   border:1px solid rgba(233,246,238,0.16);
   background: rgba(0,0,0,0.22);
 }
+.deal-art{
+  display:flex;
+  justify-content:center;
+  margin: 10px 0 14px;
+}
+
+.deal-art svg{
+  width: min(520px, 100%);
+  height: auto;
+  border-radius: 16px;
+  border: 1px solid rgba(233,246,238,0.14);
+  background: rgba(0,0,0,0.16);
+  box-shadow: 0 18px 55px rgba(0,0,0,0.35);
+}
+
+.deal-art .cap{
+  font-size:12px;
+  color: rgba(233,246,238,0.72);
+  margin-top: 8px;
+  text-align:center;
+}
 
