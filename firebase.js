@@ -6,6 +6,7 @@ import { getDatabase } from "https://www.gstatic.com/firebasejs/10.12.0/firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDld_UHHytc0huKUD9bxHUnDACKFqlQMJo",
   authDomain: "impostor-futbolistas-6eb94.firebaseapp.com",
+  databaseURL: "https://console.firebase.google.com/u/0/project/impostor-futbolistas-6eb94/database?hl=es-419",
   projectId: "impostor-futbolistas-6eb94",
   storageBucket: "impostor-futbolistas-6eb94.firebasestorage.app",
   messagingSenderId: "536914780412",
