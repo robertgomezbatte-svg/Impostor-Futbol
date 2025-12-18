@@ -4,6 +4,7 @@ const $ = (id) => document.getElementById(id);
 
 const screens = {
   setup: $("screenSetup"),
+  online: $("screenOnline"),
   deal: $("screenDeal"),
   ready: $("screenReady"),
   timer: $("screenTimer"),
@@ -19,7 +20,18 @@ const ui = {
   durationMin: $("durationMin"),
   difficulty: $("difficulty"),
   btnLocal: $("btnLocal"),
-btnOnline: $("btnOnline"),
+  btnOnline: $("btnOnline"),
+
+  // Online
+  onlineName: $("onlineName"),
+  onlineRoomCode: $("onlineRoomCode"),
+  onlineStatus: $("onlineStatus"),
+  onlineCurrentCode: $("onlineCurrentCode"),
+  onlinePlayersList: $("onlinePlayersList"),
+  btnCreateRoom: $("btnCreateRoom"),
+  btnJoinRoom: $("btnJoinRoom"),
+  btnBackFromOnline: $("btnBackFromOnline"),
+  btnCopyCode: $("btnCopyCode"),
 
   // Deal
   dealPlayerNum: $("dealPlayerNum"),
@@ -92,6 +104,10 @@ function setMiniStatus(text) {
   ui.miniStatus.textContent = text || "";
 }
 
+function setOnlineStatus(text) {
+  if (ui.onlineStatus) ui.onlineStatus.textContent = text || "";
+}
+
 function clampInt(v, min, max, fallback) {
   const n = Number.parseInt(v, 10);
   if (Number.isNaN(n)) return fallback;
@@ -132,14 +148,12 @@ function pickRandom(arr) {
 }
 
 function pickTargetAndClue(difficulty) {
-  // Try a few times to ensure clue exists
   for (let tries = 0; tries < 30; tries++) {
     const candidate = pickRandom(playersDB);
     const pistas = candidate?.pistas?.[difficulty];
     if (Array.isArray(pistas) && pistas.length > 0) {
       return { target: candidate, clue: pickRandom(pistas) };
     }
-    // Fallback: if difficulty missing, try normal -> easy -> hard
     const fallbackOrder = ["normal", "easy", "hard"];
     for (const d of fallbackOrder) {
       const p = candidate?.pistas?.[d];
@@ -148,7 +162,6 @@ function pickTargetAndClue(difficulty) {
       }
     }
   }
-  // Absolute fallback (should not happen if dataset ok)
   return { target: { id: 0, name: "Futbolista desconocido", pistas: { normal: ["Sin pista"] } }, clue: "Sin pista" };
 }
 
@@ -203,7 +216,6 @@ function renderDeal() {
   ui.revealPlayerNum.textContent = String(i);
   ui.dealProgress.textContent = `${i}/${n}`;
 
-  // Reset reveal UI
   ui.roleTag.classList.remove("impostor", "player");
   ui.roleTag.textContent = "Listo";
 
@@ -215,7 +227,6 @@ function renderDeal() {
     </div>
   `;
 
-  // Wire inline reveal
   const btnRevealInline = document.getElementById("btnRevealInline");
   btnRevealInline.addEventListener("click", onReveal);
 
@@ -264,11 +275,10 @@ function onReveal() {
   }
 
   ui.btnHide.disabled = false;
-  ui.btnNextPlayer.disabled = true; // must hide first
+  ui.btnNextPlayer.disabled = true;
 }
 
 function onHide() {
-  // Hide role again
   ui.roleTag.classList.remove("impostor", "player");
   ui.roleTag.textContent = "Oculto";
   ui.revealContent.innerHTML = `
@@ -289,7 +299,6 @@ function onNextPlayer() {
     renderDeal();
     showScreen("deal");
   } else {
-    // Done
     renderReady();
     showScreen("ready");
   }
@@ -357,7 +366,6 @@ function confirmVote() {
   const n = state.config.nPlayers;
   const chosen = clampInt(ui.voteSelect.value, 1, n, 1);
 
-  // Confirmation prompt
   const ok = window.confirm(`¿Confirmas tu voto? Has elegido: Jugador ${chosen}`);
   if (!ok) return;
 
@@ -378,7 +386,6 @@ function renderResults() {
   const counts = Array.from({ length: n + 1 }, () => 0);
   for (const v of state.game.votes) counts[v]++;
 
-  // Determine top voted (simple: first max)
   let max = -1;
   let top = 1;
   for (let i = 1; i <= n; i++) {
@@ -443,11 +450,91 @@ function escapeHtml(s) {
     .replaceAll("'", "&#039;");
 }
 
+// -------- ONLINE UI --------
+
+function renderOnlinePlayers(roomData) {
+  const players = roomData?.players || {};
+  const list = Object.values(players).map(p => p?.name).filter(Boolean);
+
+  if (!list.length) {
+    ui.onlinePlayersList.textContent = "Aún no hay jugadores en la sala.";
+    return;
+  }
+
+  ui.onlinePlayersList.innerHTML = list.map(n => `<div class="player-item">• ${escapeHtml(n)}</div>`).join("");
+}
+
+function startListeningRoom() {
+  try {
+    window.listenRoom((roomData) => {
+      const code = window.getCurrentRoomCode?.() || "—";
+      ui.onlineCurrentCode.textContent = code;
+      setOnlineStatus(roomData?.state ? `Estado sala: ${roomData.state}` : "Conectado.");
+      renderOnlinePlayers(roomData);
+    });
+  } catch (e) {
+    setOnlineStatus(String(e?.message || e));
+  }
+}
+
+async function createRoomFlow() {
+  try {
+    applySetupInputs();
+    const name = (ui.onlineName.value || "").trim() || "Host";
+
+    setOnlineStatus("Creando sala…");
+
+    const roomCode = await window.createOnlineGame({
+      duration: state.config.durationSec,
+      difficulty: state.config.difficulty,
+      nPlayers: state.config.nPlayers
+    }, name);
+
+    ui.onlineCurrentCode.textContent = roomCode;
+    setOnlineStatus("Sala creada. Comparte el código y espera que se unan.");
+    startListeningRoom();
+  } catch (e) {
+    console.error(e);
+    alert(e?.message || String(e));
+    setOnlineStatus(e?.message || String(e));
+  }
+}
+
+async function joinRoomFlow() {
+  try {
+    applySetupInputs();
+    const code = (ui.onlineRoomCode.value || "").trim();
+    const name = (ui.onlineName.value || "").trim() || "Jugador";
+
+    setOnlineStatus("Uniéndote a la sala…");
+
+    await window.joinOnlineGame(code, name);
+
+    ui.onlineCurrentCode.textContent = code;
+    setOnlineStatus("Unido a la sala. Espera instrucciones del host.");
+    startListeningRoom();
+  } catch (e) {
+    console.error(e);
+    alert(e?.message || String(e));
+    setOnlineStatus(e?.message || String(e));
+  }
+}
+
+async function copyCode() {
+  const code = ui.onlineCurrentCode.textContent || "";
+  if (!code || code === "—") return;
+  try {
+    await navigator.clipboard.writeText(code);
+    setOnlineStatus("Código copiado al portapapeles.");
+  } catch (_) {
+    alert("No se pudo copiar automáticamente. Copia el código manualmente: " + code);
+  }
+}
+
 async function init() {
   loadConfigFromStorage();
   renderSetup();
 
-  // Load dataset
   try {
     const res = await fetch("./players.json", { cache: "no-store" });
     playersDB = await res.json();
@@ -460,8 +547,7 @@ async function init() {
     return;
   }
 
-  // Wire events
-    if (!ui.btnLocal) {
+  if (!ui.btnLocal) {
     alert("Error: falta el botón btnLocal en index.html");
     return;
   }
@@ -470,27 +556,34 @@ async function init() {
     return;
   }
 
+  // Local
   ui.btnLocal.addEventListener("click", () => {
-  applySetupInputs();
-  resetGame(true);
-  renderDeal();
-  showScreen("deal");
-});
-
-// Botón online (de momento solo crea código)
-ui.btnOnline.addEventListener("click", async () => {
-  applySetupInputs();
-
-  const roomCode = await window.createOnlineGame({
-    duration: state.config.durationSec,
-    difficulty: state.config.difficulty,
-    nPlayers: state.config.nPlayers
+    applySetupInputs();
+    resetGame(true);
+    renderDeal();
+    showScreen("deal");
   });
 
-  alert("Código de partida: " + roomCode);
-});
+  // Online: ahora abre pantalla online
+  ui.btnOnline.addEventListener("click", () => {
+    applySetupInputs();
+    setMiniStatus("Modo online");
+    setOnlineStatus("Listo.");
+    ui.onlineCurrentCode.textContent = "—";
+    ui.onlinePlayersList.textContent = "—";
+    showScreen("online");
+  });
 
+  // Online handlers
+  ui.btnCreateRoom.addEventListener("click", createRoomFlow);
+  ui.btnJoinRoom.addEventListener("click", joinRoomFlow);
+  ui.btnBackFromOnline.addEventListener("click", () => {
+    setMiniStatus("Configura la partida");
+    showScreen("setup");
+  });
+  ui.btnCopyCode.addEventListener("click", copyCode);
 
+  // Local rest (igual que tenías)
   ui.btnHide.addEventListener("click", onHide);
   ui.btnNextPlayer.addEventListener("click", onNextPlayer);
 
@@ -512,8 +605,8 @@ ui.btnOnline.addEventListener("click", async () => {
 
   ui.btnPlayAgain.addEventListener("click", () => {
     stopTimer();
-    resetGame(false); // reset config too
-    loadConfigFromStorage(); // restore last config if exists
+    resetGame(false);
+    loadConfigFromStorage();
     renderSetup();
     showScreen("setup");
   });
@@ -525,7 +618,6 @@ ui.btnOnline.addEventListener("click", async () => {
     showScreen("deal");
   });
 
-  // Initial screen
   showScreen("setup");
 }
 
