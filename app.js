@@ -506,3 +506,12 @@ async function init() {
 }
 
 init();
+
+document.getElementById("btnOnline").addEventListener("click", async () => {
+  const roomCode = await window.createOnlineGame({
+    duration: 600,
+    difficulty: "normal"
+  });
+
+  alert("Código de partida: " + roomCode);
+});
