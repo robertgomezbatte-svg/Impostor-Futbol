@@ -60,11 +60,10 @@
         </div>
 
         <div class="actions">
-  <button id="btnLocal" class="btn primary">Jugar · Pasar el móvil</button>
-  <button id="btnOnline" class="btn">Jugar · Cada uno en su móvil</button>
-</div>
-      </div> <!-- cierre de .card -->
-
+          <button id="btnLocal" class="btn primary">Jugar · Pasar el móvil</button>
+          <button id="btnOnline" class="btn">Jugar · Cada uno en su móvil</button>
+        </div>
+      </div>
 
       <div class="card slim">
         <h2>Cómo se juega (resumen)</h2>
@@ -73,6 +72,52 @@
           <li>Habláis 10 minutos.</li>
           <li>Votáis por turnos en este mismo móvil.</li>
         </ol>
+      </div>
+    </section>
+
+    <!-- SCREEN: ONLINE -->
+    <section id="screenOnline" class="screen" aria-label="Modo online">
+      <div class="card">
+        <h1>Modo online</h1>
+        <p class="muted">Crea una sala y comparte el código. El resto se une desde su móvil.</p>
+
+        <div class="grid-2">
+          <label class="field">
+            <span>Tu nombre</span>
+            <input id="onlineName" type="text" placeholder="Ej: Robert" />
+            <small class="hint">Se mostrará en la sala.</small>
+          </label>
+
+          <label class="field">
+            <span>Código de sala</span>
+            <input id="onlineRoomCode" type="text" inputmode="numeric" placeholder="Ej: 123456" />
+            <small class="hint">Para unirte a una sala existente.</small>
+          </label>
+
+          <div class="field">
+            <span>Estado</span>
+            <div id="onlineStatus" class="pill">Listo.</div>
+          </div>
+
+          <div class="field">
+            <span>Sala actual</span>
+            <div class="pill code-pill">
+              <div>Código: <strong id="onlineCurrentCode">—</strong></div>
+              <button id="btnCopyCode" class="btn">Copiar</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnCreateRoom" class="btn primary">Crear partida</button>
+          <button id="btnJoinRoom" class="btn">Unirse con código</button>
+          <button id="btnBackFromOnline" class="btn danger">Volver</button>
+        </div>
+      </div>
+
+      <div class="card slim">
+        <h2>Jugadores en la sala</h2>
+        <div id="onlinePlayersList" class="players-list muted">—</div>
       </div>
     </section>
 
@@ -237,6 +282,6 @@
 
   <script src="app.js"></script>
   <script type="module" src="firebase.js"></script>
-<script type="module" src="online.js"></script>
+  <script type="module" src="online.js"></script>
 </body>
 </html>
