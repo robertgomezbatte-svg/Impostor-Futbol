@@ -2,6 +2,9 @@
 
 const $ = (id) => document.getElementById(id);
 
+/** Toggle global: deja el sistema de SVG en el código, pero no lo muestra. */
+const SHOW_DEAL_ART = false; // <-- cambia a true cuando quieras volver a verlo
+
 const screens = {
   setup: $("screenSetup"),
   online: $("screenOnline"),
@@ -22,21 +25,20 @@ const ui = {
   btnLocal: $("btnLocal"),
   btnOnline: $("btnOnline"),
 
-// Online
-onlineName: $("onlineName"),
-onlineRoomCode: $("onlineRoomCode"),
-onlineStatus: $("onlineStatus"),
-onlineCurrentCode: $("onlineCurrentCode"),
-onlinePlayersList: $("onlinePlayersList"),
-btnCreateRoom: $("btnCreateRoom"),
-btnJoinRoom: $("btnJoinRoom"),
-btnBackFromOnline: $("btnBackFromOnline"),
-btnCopyCode: $("btnCopyCode"),
-onlineStateBadge: $("onlineStateBadge"),
-onlinePlayersCount: $("onlinePlayersCount"),
-onlinePlayersMax: $("onlinePlayersMax"),
-onlinePlayersHint: $("onlinePlayersHint"),
-
+  // Online
+  onlineName: $("onlineName"),
+  onlineRoomCode: $("onlineRoomCode"),
+  onlineStatus: $("onlineStatus"),
+  onlineCurrentCode: $("onlineCurrentCode"),
+  onlinePlayersList: $("onlinePlayersList"),
+  btnCreateRoom: $("btnCreateRoom"),
+  btnJoinRoom: $("btnJoinRoom"),
+  btnBackFromOnline: $("btnBackFromOnline"),
+  btnCopyCode: $("btnCopyCode"),
+  onlineStateBadge: $("onlineStateBadge"),
+  onlinePlayersCount: $("onlinePlayersCount"),
+  onlinePlayersMax: $("onlinePlayersMax"),
+  onlinePlayersHint: $("onlinePlayersHint"),
 
   // Deal
   dealPlayerNum: $("dealPlayerNum"),
@@ -48,7 +50,6 @@ onlinePlayersHint: $("onlinePlayersHint"),
   btnHide: $("btnHide"),
   btnNextPlayer: $("btnNextPlayer"),
   dealArt: $("dealArt"),
-  
 
   // Ready
   readyDuration: $("readyDuration"),
@@ -113,6 +114,23 @@ function setMiniStatus(text) {
 
 function setOnlineStatus(text) {
   if (ui.onlineStatus) ui.onlineStatus.textContent = text || "";
+}
+
+/**
+ * Render seguro de la ilustración (o la oculta por completo si SHOW_DEAL_ART=false).
+ * Mantiene el código de SVG intacto para reactivarlo luego.
+ */
+function setDealArt(html) {
+  if (!ui.dealArt) return;
+
+  if (!SHOW_DEAL_ART) {
+    ui.dealArt.innerHTML = "";
+    ui.dealArt.style.display = "none";
+    return;
+  }
+
+  ui.dealArt.style.display = "";
+  ui.dealArt.innerHTML = html || "";
 }
 
 function clampInt(v, min, max, fallback) {
@@ -222,10 +240,9 @@ function renderDeal() {
   ui.dealPlayerNum.textContent = String(i);
   ui.revealPlayerNum.textContent = String(i);
   ui.dealProgress.textContent = `${i}/${n}`;
-  if (ui.dealArt) {
-  ui.dealArt.innerHTML = renderDealArtNeutral(`p${state.game.dealIndex}`);
-}
 
+  // Antes de revelar: arte neutro (si está habilitado)
+  setDealArt(renderDealArtNeutral(`p${state.game.dealIndex}`));
 
   ui.roleTag.classList.remove("impostor", "player");
   ui.roleTag.textContent = "Listo";
@@ -250,20 +267,18 @@ function renderDeal() {
 function onReveal() {
   const i = state.game.dealIndex;
   const impostor = (i === state.game.impostorIndex);
-// Actualiza ilustración según rol y futbolista
-if (ui.dealArt) {
+
+  // Actualiza ilustración según rol y futbolista (si está habilitado)
   const uid = `p${i}`;
-  ui.dealArt.innerHTML = impostor
-    ? renderImpostorArt(uid)
-    : renderFootballerArtByName(state.game.target?.name || "", uid);
-}
+  setDealArt(
+    impostor
+      ? renderImpostorArt(uid)
+      : renderFootballerArtByName(state.game.target?.name || "", uid)
+  );
 
   if (impostor) {
     ui.roleTag.textContent = "IMPOSTOR";
     ui.roleTag.classList.add("impostor");
-    if (ui.dealArt) {
-  ui.dealArt.innerHTML = renderDealArtNeutral(`p${state.game.dealIndex}`);
-}
 
     ui.revealContent.innerHTML = `
       <div class="rolebox">
@@ -471,6 +486,7 @@ function escapeHtml(s) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
 function normName(s) {
   return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
@@ -715,6 +731,8 @@ function svgHaalandLike(uid) {
   </svg>`;
 }
 
+/* -------- (resto de funciones SVG extra que tengas) -------- */
+
 function getPlayerArtVariant(i) {
   const uid = `p${i}`; // id único por jugador/turno
   const v = (i % 3); // 0,1,2
@@ -722,7 +740,6 @@ function getPlayerArtVariant(i) {
   if (v === 2) return playerArtRun(uid);
   return playerArtControl(uid);
 }
-
 
 // Ilustración SVG “dibujo” 1: chut
 function playerArtKick(uid) {
@@ -785,7 +802,6 @@ function playerArtKick(uid) {
   `;
 }
 
-
 // Ilustración 2: carrera
 function playerArtRun(uid) {
   return `
@@ -833,7 +849,6 @@ function playerArtRun(uid) {
   `;
 }
 
-
 // Ilustración 3: control del balón
 function playerArtControl(uid) {
   return `
@@ -876,7 +891,6 @@ function playerArtControl(uid) {
   <div class="cap">No mires pantallas ajenas. Cada pista cuenta.</div>
   `;
 }
-
 
 // -------- ONLINE UI --------
 
@@ -1053,7 +1067,6 @@ async function copyCode() {
   }
 }
 
-
 async function init() {
   loadConfigFromStorage();
   renderSetup();
@@ -1101,13 +1114,13 @@ async function init() {
   ui.btnCreateRoom.addEventListener("click", createRoomFlow);
   ui.btnJoinRoom.addEventListener("click", joinRoomFlow);
   ui.btnBackFromOnline.addEventListener("click", () => {
-  setMiniStatus("Prepara el partido");
-  showScreen("setup");
-});
+    setMiniStatus("Prepara el partido");
+    showScreen("setup");
+  });
 
   ui.btnCopyCode.addEventListener("click", copyCode);
 
-  // Local rest (igual que tenías)
+  // Local rest
   ui.btnHide.addEventListener("click", onHide);
   ui.btnNextPlayer.addEventListener("click", onNextPlayer);
 
@@ -1146,3 +1159,4 @@ async function init() {
 }
 
 init();
+
